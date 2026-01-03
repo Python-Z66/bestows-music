@@ -35,9 +35,21 @@
           <span v-html="highlight(song.name)"></span>
         </div>
         <div class="truncate pr-4 text-xs">
-          {{ song.ar ? song.ar.map((a: any) => a.name).join('/') : '未知' }}
+          <span
+            v-for="(ar, i) in song.ar"
+            :key="ar.id"
+            class="hover:text-white cursor-pointer"
+            @click.stop="router.push(`/artist/${ar.id}`)"
+          >
+            {{ ar.name }}<span v-if="i < song.ar.length - 1"> / </span>
+          </span>
         </div>
-        <div class="truncate pr-4 text-xs">{{ song.al ? song.al.name : '未知' }}</div>
+        <div
+          class="truncate pr-4 text-xs cursor-pointer hover:text-white"
+          @click.stop="router.push(`/album/${song.al.id}`)"
+        >
+          {{ song.al ? song.al.name : '未知' }}
+        </div>
         <div class="text-xs">{{ formatDuration(song.dt) }}</div>
       </div>
     </div>
@@ -70,15 +82,20 @@
           v-for="item in artists"
           :key="item.id"
           class="flex flex-col items-center group cursor-pointer"
+          @click="router.push(`/artist/${item.id}`)"
         >
-          <div class="w-full aspect-square rounded-md overflow-hidden mb-2 bg-gray-800">
+          <div
+            class="w-full aspect-square rounded-md overflow-hidden mb-2 bg-gray-800 border border-white/5"
+          >
             <img
               :src="item.picUrl || item.img1v1Url"
               class="w-full h-full object-cover group-hover:scale-105 transition"
               loading="lazy"
             />
           </div>
-          <div class="text-sm text-gray-200 group-hover:text-white">{{ item.name }}</div>
+          <div class="text-sm text-gray-200 group-hover:text-white font-medium">
+            {{ item.name }}
+          </div>
         </div>
       </div>
     </div>
@@ -115,8 +132,8 @@ const loading = ref(false)
 const hasMore = ref(true)
 const offset = ref(0)
 const limit = 30
-
 const currentType = ref(1)
+
 const tabs = [
   { label: '单曲', value: 1 },
   { label: '歌单', value: 1000 },

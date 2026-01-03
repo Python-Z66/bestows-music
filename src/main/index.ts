@@ -4,13 +4,20 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { startMusicServer } from './musicServer'
 
 let mainWindow: BrowserWindow | null = null
+let lyricWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 let isQuitting = false
-// 默认关闭行为：最小化
 let closeAction = 'minimize'
 
+function getIconPath(): string {
+  if (app.isPackaged) {
+    return join(process.resourcesPath, 'icon.png')
+  }
+  return join(__dirname, '../../build/icon.png')
+}
+
 function createTray(win: BrowserWindow) {
-  const icon = nativeImage.createFromPath(join(__dirname, '../../build/icon.png'))
+  const icon = nativeImage.createFromPath(getIconPath())
   tray = new Tray(icon)
 
   const contextMenu = Menu.buildFromTemplate([
@@ -28,6 +35,42 @@ function createTray(win: BrowserWindow) {
   tray.on('double-click', () => win.show())
 }
 
+function createLyricWindow() {
+  if (lyricWindow && !lyricWindow.isDestroyed()) {
+    lyricWindow.show()
+    return
+  }
+
+  lyricWindow = new BrowserWindow({
+    width: 800,
+    height: 150, //稍微增高一点以容纳大字体
+    minHeight: 80,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: false,
+    skipTaskbar: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      webSecurity: false
+    }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    lyricWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/desktop-lyric`)
+  } else {
+    lyricWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'desktop-lyric' })
+  }
+
+  lyricWindow.on('closed', () => {
+    lyricWindow = null
+  })
+
+  lyricWindow.setIgnoreMouseEvents(false)
+}
+
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1000,
@@ -36,7 +79,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     frame: false,
     titleBarStyle: 'hidden',
-    ...(process.platform === 'linux' ? { icon: join(__dirname, '../../build/icon.png') } : {}),
+    ...(process.platform === 'linux' ? { icon: getIconPath() } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -47,15 +90,20 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
 
-  // === 关键：关闭行为判断 ===
+  // === 核心修复：关闭逻辑 ===
   mainWindow.on('close', (event) => {
-    if (!isQuitting) {
-      if (closeAction === 'minimize') {
-        event.preventDefault()
-        mainWindow?.hide()
-        return false
-      }
-      // 如果是 'quit'，则正常走退出流程
+    // 如果已经触发了退出流程，不再拦截
+    if (isQuitting) return
+
+    if (closeAction === 'minimize') {
+      // 最小化模式：阻止关闭，隐藏窗口
+      event.preventDefault()
+      mainWindow?.hide()
+    } else {
+      // 直接退出模式：标记退出，并调用 app.quit()
+      // 注意：这里如果不设 isQuitting=true，app.quit() 会再次触发 close 事件导致死循环
+      isQuitting = true
+      app.quit()
     }
   })
 
@@ -71,27 +119,21 @@ function createWindow(): void {
   ipcMain.on('window-close', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (win === mainWindow) {
-      win.close() // 触发上面的 close 事件
+      win.close() // 触发 close 事件
     } else {
       win?.close()
     }
   })
 
-  // === 设置相关 IPC ===
-  // 1. 开机自启
+  // === 设置 IPC ===
   ipcMain.on('set-login-item-settings', (event, openAtLogin) => {
-    app.setLoginItemSettings({
-      openAtLogin: openAtLogin,
-      path: process.execPath
-    })
+    app.setLoginItemSettings({ openAtLogin, path: process.execPath })
   })
 
-  // 2. 关闭按钮行为
   ipcMain.on('set-close-action', (event, action) => {
     closeAction = action
   })
 
-  // 3. 歌词样式转发 (主窗口 -> 歌词窗口)
   ipcMain.on('update-lyric-style', (event, style) => {
     const windows = BrowserWindow.getAllWindows()
     windows.forEach((win) => {
@@ -102,10 +144,11 @@ function createWindow(): void {
   })
 
   ipcMain.on('toggle-desktop-lyric', () => {
-    const windows = BrowserWindow.getAllWindows()
-    const lyricWin = windows.find((w) => w.webContents.getURL()?.includes('desktop-lyric'))
-    if (lyricWin) lyricWin.close()
-    else mainWindow?.webContents.send('start-desktop-lyric')
+    if (lyricWindow && !lyricWindow.isDestroyed()) {
+      lyricWindow.close()
+    } else {
+      createLyricWindow()
+    }
   })
 
   ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
@@ -144,7 +187,7 @@ function createWindow(): void {
         action: 'allow',
         overrideBrowserWindowOptions: {
           width: 800,
-          height: 120,
+          height: 150,
           minHeight: 80,
           frame: false,
           transparent: true,

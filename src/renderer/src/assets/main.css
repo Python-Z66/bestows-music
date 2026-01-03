@@ -2,7 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-color: #ec4141;
+}
+
 body {
-  @apply bg-ncm-bg text-white; /* 默认应用深色背景和白字 */
-  overflow: hidden; /* 隐藏滚动条，因为我们要自己模拟滚动 */
+  @apply bg-ncm-bg text-white;
+  overflow: hidden;
+}
+
+/* 覆盖主题色 */
+.text-ncm-red { color: var(--primary-color) !important; }
+.bg-ncm-red { background-color: var(--primary-color) !important; }
+.border-ncm-red { border-color: var(--primary-color) !important; }
+.accent-ncm-red { accent-color: var(--primary-color) !important; }
+
+/* 磨砂玻璃 */
+.glass-panel {
+  background: rgba(20, 20, 23, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glow-shadow {
+  box-shadow: 0 0 15px var(--primary-color), 0 0 30px rgba(0,0,0,0.3);
+}
+
+/* 专辑动画 */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* === 全局滚动条美化 === */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

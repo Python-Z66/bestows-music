@@ -10,7 +10,9 @@ files:
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslint*,prettier*}'
   - '!{README.md,jsconfig.json,tsconfig.json}'
-
+extraResources:
+  - from: build/icon.png
+    to: icon.png
 linux:
   icon: build/icon.png
   category: Audio

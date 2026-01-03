@@ -1,7 +1,8 @@
 <template>
   <div
-    class="w-full h-full flex flex-col items-center justify-center overflow-hidden select-none relative group"
-    :class="{ 'bg-black/60 rounded-xl border border-white/10 shadow-2xl': !isLocked }"
+    class="w-full h-full flex flex-col justify-center overflow-hidden select-none relative group"
+    :class="{ 'bg-black/20 backdrop-blur-sm rounded-xl border border-white/10': !isLocked }"
+    :style="{ alignItems: alignMap[style.textAlign] || 'center' }"
     @mouseenter="handleMouseEnterWindow"
     @mouseleave="handleMouseLeaveWindow"
   >
@@ -9,91 +10,104 @@
 
     <div
       v-if="!isLocked"
-      class="absolute top-0 left-0 right-0 h-9 flex items-center justify-between px-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      class="absolute top-0 left-0 right-0 h-10 flex items-center justify-between px-3 z-50 opacity-40 group-hover:opacity-100 transition-opacity duration-200 bg-black/40 backdrop-blur-md rounded-t-xl"
     >
-      <div class="flex items-center space-x-1 no-drag">
+      <div class="flex items-center space-x-2 no-drag">
         <button
           @click="toggleLock"
-          class="text-gray-300 hover:text-green-400 p-1 rounded hover:bg-white/10 transition"
+          class="text-gray-200 hover:text-green-400 p-1.5 rounded-full hover:bg-white/10 transition"
+          title="锁定歌词 (鼠标穿透)"
         >
-          <Icon icon="mdi:lock-open-outline" />
+          <Icon icon="mdi:lock-open-outline" class="text-lg" />
         </button>
-        <div class="flex items-center bg-white/10 rounded ml-2 scale-90">
+        <div class="flex items-center bg-white/10 rounded ml-2 scale-90 border border-white/10">
           <button
             @click="adjustOffset(-500)"
-            class="px-1.5 py-0.5 text-[10px] text-gray-300 hover:text-white hover:bg-white/20"
+            class="px-2 py-0.5 hover:bg-white/10 text-gray-300 text-xs rounded-l"
           >
             -0.5s
           </button>
           <div class="w-[1px] h-3 bg-white/20"></div>
           <button
             @click="adjustOffset(500)"
-            class="px-1.5 py-0.5 text-[10px] text-gray-300 hover:text-white hover:bg-white/20"
+            class="px-2 py-0.5 hover:bg-white/10 text-gray-300 text-xs rounded-r"
           >
             +0.5s
           </button>
         </div>
       </div>
-      <div class="flex items-center space-x-3 text-gray-200 no-drag">
-        <Icon
-          icon="mdi:skip-previous"
-          class="hover:text-white cursor-pointer hover:scale-110"
-          @click="control('prev')"
-        />
-        <Icon
-          :icon="isPlaying ? 'mdi:pause' : 'mdi:play'"
-          class="hover:text-white cursor-pointer hover:scale-110 text-lg"
-          @click="control('toggle')"
-        />
-        <Icon
-          icon="mdi:skip-next"
-          class="hover:text-white cursor-pointer hover:scale-110"
-          @click="control('next')"
-        />
+
+      <div class="flex items-center space-x-4 text-gray-200 no-drag">
+        <button class="hover:text-white hover:scale-110 transition p-1" @click="control('prev')">
+          <Icon icon="mdi:skip-previous" class="text-xl" />
+        </button>
+        <button class="hover:text-white hover:scale-110 transition p-1" @click="control('toggle')">
+          <Icon :icon="isPlaying ? 'mdi:pause' : 'mdi:play'" class="text-2xl" />
+        </button>
+        <button class="hover:text-white hover:scale-110 transition p-1" @click="control('next')">
+          <Icon icon="mdi:skip-next" class="text-xl" />
+        </button>
       </div>
+
       <div class="no-drag">
         <button
           @click="closeWindow"
-          class="text-gray-300 hover:text-red-500 p-1 rounded hover:bg-white/10 transition"
+          class="text-gray-200 hover:text-white hover:bg-red-500/80 p-1.5 rounded-full transition duration-200"
+          title="关闭歌词"
         >
-          <Icon icon="mdi:close" />
+          <Icon icon="mdi:close" class="text-lg" />
         </button>
       </div>
     </div>
 
     <div
       v-if="isLocked"
-      class="absolute top-2 left-1/2 -translate-x-1/2 z-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer bg-black/50 p-1.5 rounded-full text-green-400 border border-green-500/30 backdrop-blur-md no-drag shadow-lg"
+      class="absolute top-2 left-1/2 -translate-x-1/2 z-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer bg-black/60 p-2 rounded-full text-green-400 border border-green-500/30 backdrop-blur-md no-drag shadow-lg hover:scale-110 hover:bg-black/80"
       @click="toggleLock"
       @mouseenter="setIgnore(false)"
       @mouseleave="setIgnore(true)"
+      title="点击解锁"
     >
-      <Icon icon="mdi:lock" class="text-sm" />
+      <Icon icon="mdi:lock" class="text-base" />
     </div>
 
-    <div class="relative z-10 w-full px-4 text-center pointer-events-none mt-3">
-      <div class="relative inline-block max-w-full">
+    <div
+      class="relative z-10 w-full px-8 pointer-events-none mt-2"
+      :style="{ textAlign: style.textAlign }"
+    >
+      <div class="relative inline-block max-w-full leading-none">
         <div
-          class="font-bold text-white whitespace-nowrap transition-all duration-300"
+          class="font-bold whitespace-nowrap text-transparent select-none"
           :style="{
-            fontSize: lyricFontSize + 'px',
-            lineHeight: lyricFontSize * 1.2 + 'px',
-            textShadow:
-              '2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px 2px black'
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize + 'px',
+            WebkitTextStroke: `${style.strokeWidth}px ${style.strokeColor}`,
+            opacity: 0.8
           }"
         >
           {{ currentText }}
         </div>
 
         <div
-          class="absolute top-0 left-0 font-bold whitespace-nowrap overflow-hidden text-transparent bg-clip-text transition-all duration-300"
+          class="absolute top-0 left-0 font-bold whitespace-nowrap text-white select-none"
           :style="{
-            fontSize: lyricFontSize + 'px',
-            lineHeight: lyricFontSize * 1.2 + 'px',
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize + 'px',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+          }"
+        >
+          {{ currentText }}
+        </div>
+
+        <div
+          class="absolute top-0 left-0 font-bold whitespace-nowrap overflow-hidden text-transparent bg-clip-text select-none"
+          :style="{
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize + 'px',
             width: animationWidth + '%',
             transition: `width ${duration}ms linear`,
-            textShadow: 'none',
-            backgroundImage: `linear-gradient(to bottom, #ffffff 0%, ${lyricColor} 100%)`
+            backgroundImage: `linear-gradient(to bottom, #ffffff 20%, ${style.color} 80%)`,
+            filter: 'drop-shadow(0 0 1px rgba(255,255,255,0.5))'
           }"
         >
           {{ currentText }}
@@ -104,18 +118,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { Icon } from '@iconify/vue'
 
-const currentText = ref('桌面歌词就绪')
+const currentText = ref('Bestows Music')
 const isLocked = ref(false)
 const isPlaying = ref(false)
 const duration = ref(0)
 const animationWidth = ref(0)
 
-// 默认样式
-const lyricColor = ref('#4ade80')
-const lyricFontSize = ref(36)
+const alignMap: Record<string, string> = { left: 'flex-start', center: 'center', right: 'flex-end' }
+
+const style = reactive({
+  color: '#4ade80',
+  fontSize: 40,
+  fontFamily: '"Arial Rounded MT Bold", "Microsoft YaHei", sans-serif',
+  strokeColor: '#000000',
+  strokeWidth: 4,
+  textAlign: 'center' as 'left' | 'center' | 'right'
+})
 
 const adjustOffset = (ms: number) => {
   if (window.electron)
@@ -152,11 +173,13 @@ onMounted(() => {
   const cached = localStorage.getItem('current-lyric-text')
   if (cached) currentText.value = cached
 
-  // 初始化读取样式
-  const c = localStorage.getItem('lyric-color')
-  const s = localStorage.getItem('lyric-font-size')
-  if (c) lyricColor.value = c
-  if (s) lyricFontSize.value = Number(s)
+  const ls = localStorage
+  style.color = ls.getItem('lyric-color') || style.color
+  style.fontSize = Number(ls.getItem('lyric-font-size')) || style.fontSize
+  style.fontFamily = ls.getItem('lyric-font-family') || style.fontFamily
+  style.strokeColor = ls.getItem('lyric-stroke-color') || style.strokeColor
+  style.strokeWidth = Number(ls.getItem('lyric-stroke-width')) || style.strokeWidth
+  style.textAlign = (ls.getItem('lyric-text-align') as any) || style.textAlign
 
   if (window.electron) {
     window.electron.ipcRenderer.on('lyric-update', (_event, data: any) => {
@@ -175,16 +198,13 @@ onMounted(() => {
         }
       })
     })
-
     window.electron.ipcRenderer.on('lyric-reset-state', () => {
       isLocked.value = false
       setIgnore(false)
     })
 
-    // 监听样式更新
-    window.electron.ipcRenderer.on('style-update', (_event, style: any) => {
-      lyricColor.value = style.color
-      lyricFontSize.value = style.fontSize
+    window.electron.ipcRenderer.on('style-update', (_event, newStyle: any) => {
+      Object.assign(style, newStyle)
     })
   }
 })

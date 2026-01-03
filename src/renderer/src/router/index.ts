@@ -1,14 +1,19 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-// 首页比较重要，可以保留静态引入，或者也改为动态
+// 首页比较重要，可以保留静态引入
 import Discovery from '../views/Discovery.vue'
 
 const routes = [
   { path: '/', redirect: '/discovery' },
   { path: '/discovery', component: Discovery },
 
-  // === 性能优化：路由懒加载 ===
+  // === 核心业务页面 ===
   { path: '/playlist/:id', component: () => import('../views/Playlist.vue') },
+  { path: '/artist/:id', component: () => import('../views/Artist.vue') }, // 新增：歌手详情
+  { path: '/album/:id', component: () => import('../views/Album.vue') }, // 新增：专辑详情
+  { path: '/mv/:id', component: () => import('../views/MV.vue') }, // 新增：MV播放
+
+  // === 功能页面 ===
   { path: '/search', component: () => import('../views/Search.vue') },
   { path: '/desktop-lyric', component: () => import('../views/DesktopLyric.vue') },
   { path: '/playlist-square', component: () => import('../views/PlaylistSquare.vue') },

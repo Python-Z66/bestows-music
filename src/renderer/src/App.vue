@@ -5,8 +5,11 @@
 
   <div
     v-else
-    class="relative h-screen w-screen overflow-hidden bg-black font-sans select-none text-white"
+    class="relative h-screen w-screen overflow-hidden font-sans select-none text-white transition-colors duration-500"
+    :style="{ '--primary-color': settingsStore.themeColor }"
   >
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-[#2b2b2b] to-[#121212]"></div>
+
     <div
       v-if="settingsStore.backgroundImage"
       class="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-300 pointer-events-none"
@@ -17,16 +20,16 @@
     ></div>
 
     <div class="relative z-10 flex h-full w-full backdrop-blur-sm">
-      <div class="w-52 h-full border-r border-white/10 flex-shrink-0">
+      <div class="w-52 h-full border-r border-white/5 flex-shrink-0 bg-black/10">
         <Sidebar @open-theme="showThemeModal = true" />
       </div>
 
-      <div class="flex-1 flex flex-col h-full min-w-0 bg-gray-900/40">
+      <div class="flex-1 flex flex-col h-full min-w-0 bg-black/10">
         <header
           class="h-14 border-b border-white/5 flex items-center px-4 drag-region flex-shrink-0 justify-between"
         >
           <div
-            class="flex items-center bg-black/20 rounded-full px-3 py-1 border border-white/5 text-xs text-gray-300 w-64 no-drag transition focus-within:bg-black/40 focus-within:border-white/20"
+            class="flex items-center bg-black/10 rounded-full px-3 py-1 border border-white/5 text-xs text-gray-300 w-64 no-drag transition focus-within:bg-black/30 focus-within:border-ncm-red"
           >
             <Icon icon="mdi:magnify" class="mr-2 text-base" />
             <input
@@ -71,10 +74,7 @@
           <SongQueue v-if="showQueue" />
         </transition>
 
-        <footer
-          v-show="!showLyrics"
-          class="h-20 flex-shrink-0 border-t border-white/5 z-50 bg-gray-900/60 backdrop-blur-md"
-        >
+        <footer class="h-24 flex-shrink-0 z-50 transition-all duration-300" v-show="!showLyrics">
           <PlayerBar @toggle-queue="toggleQueue" @toggle-lyrics="showLyrics = !showLyrics" />
         </footer>
       </div>
@@ -137,7 +137,7 @@ onMounted(() => {
 .no-drag {
   -webkit-app-region: no-drag;
 }
-/* ... scrollbar styles ... */
+/* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 6px;
 }

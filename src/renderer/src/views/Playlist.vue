@@ -94,7 +94,10 @@
         <div class="truncate pr-4 text-gray-400 group-hover:text-gray-200">
           {{ song.ar.map((a: any) => a.name).join('/') }}
         </div>
-        <div class="truncate pr-4 text-gray-400 group-hover:text-gray-200">
+        <div
+          class="truncate pr-4 text-gray-400 group-hover:text-gray-200 cursor-pointer hover:underline"
+          @click.stop="router.push(`/album/${song.al.id}`)"
+        >
           {{ song.al.name }}
         </div>
         <div class="text-gray-500">{{ formatDuration(song.dt) }}</div>
@@ -119,6 +122,7 @@ import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import request from '../utils/request'
 import { usePlayerStore } from '../stores/player'
+import router from '@renderer/router'
 
 const route = useRoute()
 const playerStore = usePlayerStore()

@@ -3,7 +3,12 @@
     <h1 class="text-2xl font-bold mb-6">全部 MV</h1>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div v-for="item in videos" :key="item.id" class="group cursor-pointer">
+      <div
+        v-for="item in videos"
+        :key="item.id"
+        class="group cursor-pointer"
+        @click="router.push(`/mv/${item.id}`)"
+      >
         <div
           class="relative aspect-video rounded-md overflow-hidden bg-gray-800 mb-2 border border-white/5"
         >
@@ -49,9 +54,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import request from '../utils/request'
 import { Icon } from '@iconify/vue'
 
+const router = useRouter()
 const videos = ref<any[]>([])
 const loading = ref(false)
 const hasMore = ref(true)
@@ -68,7 +75,6 @@ const loadData = async (append = false) => {
   if (loading.value) return
   loading.value = true
   try {
-    // 使用 /mv/all 接口支持分页
     const res: any = await request.get(`/mv/all?limit=${limit}&offset=${offset.value}`)
     const newItems = res.data || []
 
