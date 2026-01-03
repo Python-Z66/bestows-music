@@ -1,0 +1,40 @@
+appId: com.bestows.music
+productName: Bestows Music
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslint*,prettier*}'
+  - '!{README.md,jsconfig.json,tsconfig.json}'
+
+linux:
+  icon: build/icon.png
+  category: Audio
+  # 描述和概要会自动用于生成的 .desktop 文件
+  synopsis: A modern music player based on Netease Cloud Music
+  description: Bestows Music Player with desktop lyrics and high customization.
+  maintainer: Bestows <your-email@example.com>
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+    - target: rpm
+      arch:
+        - x64
+
+win:
+  target: nsis
+  icon: build/icon.png
+
+mac:
+  target: dmg
+  icon: build/icon.png
