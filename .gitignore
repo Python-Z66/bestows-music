@@ -4,7 +4,6 @@ out
 .DS_Store
 .eslintcache
 *.log*
-build/icon.png
 build/icons
 .DS_Store
 .idea

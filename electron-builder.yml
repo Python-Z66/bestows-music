@@ -19,7 +19,7 @@ linux:
   # 描述和概要会自动用于生成的 .desktop 文件
   synopsis: A modern music player based on Netease Cloud Music
   description: Bestows Music Player with desktop lyrics and high customization.
-  maintainer: Bestows <your-email@example.com>
+  maintainer: Bestows <3399743949@qq.com>
   target:
     - target: AppImage
       arch:
@@ -30,6 +30,9 @@ linux:
         - x64
         - arm64
     - target: rpm
+      arch:
+        - x64
+    - target: pacman
       arch:
         - x64
 

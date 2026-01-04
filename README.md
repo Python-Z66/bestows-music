@@ -63,7 +63,7 @@
 
 1.  **克隆项目**
     ```bash
-    git clone [https://github.com/Bestows/bestows-music.git](https://github.com/Bestows/bestows-music.git)
+    git clone https://github.com/Python-Z66/bestows-music.git
     cd bestows-music
     ```
 
@@ -93,5 +93,7 @@ npm run build:linux
 欢迎提交 Issue 或 Pull Request！
 如果你喜欢这个项目，请给它一个 ⭐️ Star！
 作者: Bestows
+
 GitHub: https://github.com/Python-Z66
+
 Gitee: https://gitee.com/bestows_zth/bestows-music-player
